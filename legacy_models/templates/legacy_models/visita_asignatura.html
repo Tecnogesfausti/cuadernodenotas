@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visita asignatura</title>
+  <style>
+    body { font: normal 10pt Verdana, Arial, sans-serif; margin: 12px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 8px; }
+    td, th { text-align: left; border: 1px solid #ccc; padding: 4px 6px; vertical-align: top; }
+    thead th { background: #f5f5f5; position: sticky; top: 0; z-index: 2; }
+    tr:nth-of-type(odd) { background-color: #f8f8f8; }
+    .muted { color: #666; font-size: 12px; }
+    .controls { margin: 8px 0 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .btn {
+      border: 1px solid #0b63c9;
+      color: #fff;
+      background: #0b63c9;
+      padding: 6px 10px;
+      text-decoration: none;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    .btn.alt { background: #e9eef7; color: #123; border-color: #b8c7e6; }
+    .nowrap { white-space: nowrap; }
+    .rotate { min-width: 110px; }
+    .panel {
+      border: 1px solid #d7d7d7;
+      background: #fff;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  {% if asignatura %}
+    <div class="panel">
+      <h2 style="margin:0 0 6px;">Asignatura: {{ asignatura.nombre }} | Trimestre: {{ trimestre }}</h2>
+      <div class="muted">
+        Importacion activa: {{ latest_importacion.id }} ({{ latest_importacion.curso }}) |
+        {% if grupo_sel %}Grupo: {{ grupo_sel.grupo }} |{% endif %}
+        Alumnos: {{ filas|length }} |
+        Conceptos: {{ conceptos|length }}
+      </div>
+    </div>
+    <div class="controls">
+      <a class="btn alt" href="/evaluaciones/?{% if grupo_id %}grupo_id={{ grupo_id }}&{% endif %}trimestre={{ trimestre }}">Volver al menu</a>
+      <a class="btn {% if orden == 0 %}alt{% endif %}" href="/evaluaciones/visitaasignatura/{{ asignatura.id }}/{{ trimestre }}/0/{% if grupo_id %}?grupo_id={{ grupo_id }}{% endif %}">Ord. Grupos</a>
+      <a class="btn {% if orden == 1 %}alt{% endif %}" href="/evaluaciones/visitaasignatura/{{ asignatura.id }}/{{ trimestre }}/1/{% if grupo_id %}?grupo_id={{ grupo_id }}{% endif %}">Ord. Nombre</a>
+      <span class="muted">modo actual: {% if orden == 1 %}nombre{% else %}grupos{% endif %}</span>
+    </div>
+
+    <table id="tabla-asignatura">
+      <thead>
+        <tr>
+          <th>Alumno</th>
+          <th>Grupo</th>
+          {% for concepto in conceptos %}
+            <th>
+              {{ concepto.descripcion }}<br>
+              <span class="muted">peso {{ concepto.peso_nota }}</span>
+            </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for fila in filas %}
+          <tr>
+            <td class="nowrap">{{ fila.alumno.alumno.nombre }}</td>
+            <td class="nowrap">{{ fila.alumno.alumno.grupo|default:"-" }}</td>
+            {% for asunto in fila.celdas %}
+              <td>
+                {% if asunto %}
+                  <div><b>Nota:</b> {{ asunto.nota }}</div>
+                  {% if asunto.valoracion %}<div><b>Valoracion:</b> {{ asunto.valoracion }}</div>{% endif %}
+                  {% if asunto.anotaciones %}<div><b>Anotacion:</b> {{ asunto.anotaciones }}</div>{% endif %}
+                  {% if asunto.fecha %}<div class="muted">{{ asunto.fecha }}</div>{% endif %}
+                {% else %}
+                  <span class="muted">-</span>
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="100%">No hay alumnos o no hay datos para esta combinacion.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <h1>Sin importaciones</h1>
+    <p>No existe ninguna importacion en la base de datos.</p>
+  {% endif %}
+</body>
+</html>

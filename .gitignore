@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Local DB/logs
+db.sqlite3
+*.log
+
+# Sensitive OAuth/Gmail plaintext secrets (do not commit)
+client_secret*.json
+*.gmail.storage
+*.token.json
+*oauth.client.json
+
+# Keep encrypted versions (*.enc) if needed in repo
